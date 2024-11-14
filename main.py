@@ -388,10 +388,14 @@ class MainForm(qtw.QWidget):
         '''
         try:
             rxs = str(rx)
+            #print(rxs)
             recieved = getRecievedFromSerial(rxs)
-            self.stationWidget.rssiLCD_1.display(recieved['rssi1'])
-            self.stationWidget.rssiLCD_2.display(recieved['rssi2'])
-            self.stationWidget.rssiLCD_3.display(recieved['rssi3'])
+            if recieved['rssi1'] != 0:
+                self.stationWidget.rssiLCD_1.display(recieved['rssi1'])
+            if recieved['rssi2'] != 0:
+                self.stationWidget.rssiLCD_2.display(recieved['rssi2'])
+            if recieved['rssi3'] != 0:
+                self.stationWidget.rssiLCD_3.display(recieved['rssi3'])
 
         except:
             self.stationWidget.rssiLCD_1.display('error')
