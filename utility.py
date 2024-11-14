@@ -116,29 +116,43 @@ def getRecievedFromSerial(recievedStr):
     recievedFromAntennas['rssi2'] = 0
     recievedFromAntennas['rssi3'] = 0
 
-    recievedList = recievedStr.split('&')
-
-    if len(recievedList) > 1:
-        recievedStr1 = recievedList[1]
-        recievedStr2 = recievedList[2]
-
-    fillrecievedFromAntennas(recievedFromAntennas, recievedStr1)
-    fillrecievedFromAntennas(recievedFromAntennas, recievedStr2)
-
+    dataIn = getDataFromStr(recievedStr)
+    if dataIn != '':
+        fillrecievedFromAntennas(recievedFromAntennas, dataIn)
     return recievedFromAntennas
 
-def fillrecievedFromAntennas(recievedFromAntennas, recievedStrIn):
-    if recievedStrIn.find('][') > 0:
+def getDataFromStr(strIn):
+    if strIn.find('#RSSI ') >= 0:
+        data = strIn[8:]
+        #print (len(strIn))
+        indexEnd = data.find("\\r\\n")
+        if indexEnd > 0:
+            data = data[0:indexEnd]
+        else:
+            data = ''
+    else:
+        data = ''
+
+    return data
+
+def fillrecievedFromAntennas(recievedFromAntennas, dataIn):
+    if dataIn.find('][') > 0:
         #RSSI [1040 1][5865 0]
-        recievedStr = recievedStrIn[7:]
-        recievedList = recievedStr.split('][')
-        recievedStr12 = recievedList[0].split(" ")[1]
-        recievedStr58 = recievedList[1].replace("]"," ")
-        recievedStr58 = recievedStr58.split(" ")[1]
-        recievedFromAntennas['rssi1'] = recievedStr58
-        recievedFromAntennas['rssi2'] = recievedStr12
-    elif recievedStrIn.find('\\r\\n') > 0:
+        fillrecievedFromAntennasDouble(recievedFromAntennas, dataIn)
+    else:
         #RSSI 928
-        recievedStr12 = recievedStrIn.replace("\\r\\n", " ")
-        recievedStr12 = recievedStr12.split(" ")[1]
-        recievedFromAntennas['rssi3'] = recievedStr12
+        fillrecievedFromAntennasSingle(recievedFromAntennas, dataIn)
+
+def fillrecievedFromAntennasDouble(recievedFromAntennas, dataIn):
+    recievedStr = dataIn[1:]
+    recievedList = recievedStr.split('][')
+    recievedStr12 = recievedList[0].split(" ")[1]
+    recievedStr58 = recievedList[1].replace("]"," ")
+    recievedStr58 = recievedStr58.split(" ")[1]
+    recievedFromAntennas['rssi1'] = recievedStr58
+    recievedFromAntennas['rssi2'] = recievedStr12
+
+def fillrecievedFromAntennasSingle(recievedFromAntennas, dataIn):
+    recievedStr12 = dataIn
+    recievedFromAntennas['rssi3'] = recievedStr12
+
